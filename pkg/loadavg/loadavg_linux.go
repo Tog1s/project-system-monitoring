@@ -7,24 +7,54 @@ import (
 )
 
 type LoadAverage struct {
-	OneMinutes     float32
-	FiveMinutes    float32
-	FifteenMinutes float32
-	ProcRuning     int
-	ProcAll        int
-	LastProcessId  int
+	OneMinutes     float64
+	FiveMinutes    float64
+	FifteenMinutes float64
+	// ProcRuning     int
+	// ProcAll        int
+	// LastProcessId  int
 }
 
-func Read() LoadAverage {
+func Get() (*LoadAverage, error) {
+	stats, err := loadAvgFromFile()
+	if err != nil {
+		return nil, err
+	}
+	return stats, err
+}
+
+func loadAvgFromFile() (*LoadAverage, error) {
+	values, err := readFromFile()
+	if err != nil {
+		return nil, err
+	}
+
+	oneMinutes, err := strconv.ParseFloat(values[0], 64)
+	if err != nil {
+		return nil, err
+	}
+
+	fiveMinutes, err := strconv.ParseFloat(values[1], 64)
+	if err != nil {
+		return nil, err
+	}
+
+	fifteenMinutes, err := strconv.ParseFloat(values[2], 64)
+	if err != nil {
+		return nil, err
+	}
+
+	return &LoadAverage{
+		OneMinutes:     oneMinutes,
+		FiveMinutes:    fiveMinutes,
+		FifteenMinutes: fifteenMinutes,
+	}, nil
+}
+
+func readFromFile() ([]string, error) {
 	f, err := os.ReadFile("/proc/loadavg")
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
-	var loadAvg LoadAverage
-	data := strings.Split(string(f), " ")
-
-	oneMinutes, _ := strconv.ParseFloat(data[0], 32)
-	loadAvg.OneMinutes = float32(oneMinutes)
-
-	return loadAvg
+	return strings.Split(string(f), " "), nil
 }
