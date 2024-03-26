@@ -21,6 +21,7 @@ run-client:
 	go run cmd/client/main.go
 
 test:
+	go test -race -count 100 ./pkg/...
 	go test -race -count 100 ./internal/...
 
 lint:
