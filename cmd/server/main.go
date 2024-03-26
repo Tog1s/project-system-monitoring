@@ -79,7 +79,10 @@ func collectMetrics() {
 			}
 			record.Load = loadAvg
 		}
-		store.Write(*record)
+		err := store.Write(*record)
+		if err != nil {
+			log.Printf("record writing error: %v", err)
+		}
 	}
 }
 

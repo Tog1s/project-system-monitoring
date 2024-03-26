@@ -1,12 +1,15 @@
 package storage
 
 import (
+	"errors"
 	"sync"
 	"time"
 
 	"github.com/google/uuid"
 	"github.com/tog1s/project-system-monitoring/internal/metrics"
 )
+
+var ErrObjectExist = errors.New("object already created")
 
 type Store struct {
 	mu      sync.RWMutex
@@ -24,7 +27,7 @@ func (s *Store) Write(m metrics.SystemMetrics) error {
 	defer s.mu.Unlock()
 
 	if _, ok := s.metrics[m.ID]; ok {
-		return nil
+		return ErrObjectExist
 	}
 
 	s.metrics[m.ID] = m
