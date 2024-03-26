@@ -26,7 +26,7 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type MetricsClient interface {
-	Get(ctx context.Context, in *Request, opts ...grpc.CallOption) (*Response, error)
+	Get(ctx context.Context, in *Request, opts ...grpc.CallOption) (Metrics_GetClient, error)
 }
 
 type metricsClient struct {
@@ -37,20 +37,43 @@ func NewMetricsClient(cc grpc.ClientConnInterface) MetricsClient {
 	return &metricsClient{cc}
 }
 
-func (c *metricsClient) Get(ctx context.Context, in *Request, opts ...grpc.CallOption) (*Response, error) {
-	out := new(Response)
-	err := c.cc.Invoke(ctx, Metrics_Get_FullMethodName, in, out, opts...)
+func (c *metricsClient) Get(ctx context.Context, in *Request, opts ...grpc.CallOption) (Metrics_GetClient, error) {
+	stream, err := c.cc.NewStream(ctx, &Metrics_ServiceDesc.Streams[0], Metrics_Get_FullMethodName, opts...)
 	if err != nil {
 		return nil, err
 	}
-	return out, nil
+	x := &metricsGetClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type Metrics_GetClient interface {
+	Recv() (*Response, error)
+	grpc.ClientStream
+}
+
+type metricsGetClient struct {
+	grpc.ClientStream
+}
+
+func (x *metricsGetClient) Recv() (*Response, error) {
+	m := new(Response)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
 }
 
 // MetricsServer is the server API for Metrics service.
 // All implementations must embed UnimplementedMetricsServer
 // for forward compatibility
 type MetricsServer interface {
-	Get(context.Context, *Request) (*Response, error)
+	Get(*Request, Metrics_GetServer) error
 	mustEmbedUnimplementedMetricsServer()
 }
 
@@ -58,8 +81,8 @@ type MetricsServer interface {
 type UnimplementedMetricsServer struct {
 }
 
-func (UnimplementedMetricsServer) Get(context.Context, *Request) (*Response, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Get not implemented")
+func (UnimplementedMetricsServer) Get(*Request, Metrics_GetServer) error {
+	return status.Errorf(codes.Unimplemented, "method Get not implemented")
 }
 func (UnimplementedMetricsServer) mustEmbedUnimplementedMetricsServer() {}
 
@@ -74,22 +97,25 @@ func RegisterMetricsServer(s grpc.ServiceRegistrar, srv MetricsServer) {
 	s.RegisterService(&Metrics_ServiceDesc, srv)
 }
 
-func _Metrics_Get_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Request)
-	if err := dec(in); err != nil {
-		return nil, err
+func _Metrics_Get_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(Request)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
 	}
-	if interceptor == nil {
-		return srv.(MetricsServer).Get(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Metrics_Get_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MetricsServer).Get(ctx, req.(*Request))
-	}
-	return interceptor(ctx, in, info, handler)
+	return srv.(MetricsServer).Get(m, &metricsGetServer{stream})
+}
+
+type Metrics_GetServer interface {
+	Send(*Response) error
+	grpc.ServerStream
+}
+
+type metricsGetServer struct {
+	grpc.ServerStream
+}
+
+func (x *metricsGetServer) Send(m *Response) error {
+	return x.ServerStream.SendMsg(m)
 }
 
 // Metrics_ServiceDesc is the grpc.ServiceDesc for Metrics service.
@@ -98,12 +124,13 @@ func _Metrics_Get_Handler(srv interface{}, ctx context.Context, dec func(interfa
 var Metrics_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "metrics.Metrics",
 	HandlerType: (*MetricsServer)(nil),
-	Methods: []grpc.MethodDesc{
+	Methods:     []grpc.MethodDesc{},
+	Streams: []grpc.StreamDesc{
 		{
-			MethodName: "Get",
-			Handler:    _Metrics_Get_Handler,
+			StreamName:    "Get",
+			Handler:       _Metrics_Get_Handler,
+			ServerStreams: true,
 		},
 	},
-	Streams:  []grpc.StreamDesc{},
 	Metadata: "metrics.proto",
 }

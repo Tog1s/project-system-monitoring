@@ -3,6 +3,7 @@ module github.com/tog1s/project-system-monitoring
 go 1.21.1
 
 require (
+	github.com/google/uuid v1.6.0
 	google.golang.org/grpc v1.62.1
 	google.golang.org/protobuf v1.33.0
 )

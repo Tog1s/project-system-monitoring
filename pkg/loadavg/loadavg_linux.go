@@ -7,9 +7,9 @@ import (
 )
 
 type LoadAverage struct {
-	OneMinutes     float64
-	FiveMinutes    float64
-	FifteenMinutes float64
+	LoadAvg1  float64
+	LoadAvg5  float64
+	LoadAvg15 float64
 	// ProcRuning     int
 	// ProcAll        int
 	// LastProcessId  int
@@ -29,25 +29,25 @@ func loadAvgFromFile() (*LoadAverage, error) {
 		return nil, err
 	}
 
-	oneMinutes, err := strconv.ParseFloat(values[0], 64)
+	loadAvg1, err := strconv.ParseFloat(values[0], 64)
 	if err != nil {
 		return nil, err
 	}
 
-	fiveMinutes, err := strconv.ParseFloat(values[1], 64)
+	loadAvg5, err := strconv.ParseFloat(values[1], 64)
 	if err != nil {
 		return nil, err
 	}
 
-	fifteenMinutes, err := strconv.ParseFloat(values[2], 64)
+	loadAvg15, err := strconv.ParseFloat(values[2], 64)
 	if err != nil {
 		return nil, err
 	}
 
 	return &LoadAverage{
-		OneMinutes:     oneMinutes,
-		FiveMinutes:    fiveMinutes,
-		FifteenMinutes: fifteenMinutes,
+		LoadAvg1:  loadAvg1,
+		LoadAvg5:  loadAvg5,
+		LoadAvg15: loadAvg15,
 	}, nil
 }
 

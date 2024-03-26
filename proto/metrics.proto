@@ -3,7 +3,7 @@ package metrics;
 option go_package = "./;pb";
 
 service Metrics {
-    rpc Get(Request) returns (Response) { 
+    rpc Get(Request) returns (stream Response) { 
     }
 } 
 
@@ -12,6 +12,7 @@ message Request {
 }
 
 message Response {
-    float OneMinutes = 1;
+    float LoadAvg1 = 1;
+    float LoadAvg5 = 2;
+    float LoadAvg15 = 3;
 }
-

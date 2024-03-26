@@ -8,12 +8,9 @@ generate:
 		--go-grpc_out=pb/ \
 		proto/*.proto
 
-run:
-	go run cmd/main.go
-
 run-server:
-	go run server/main.go
+	go run cmd/server/main.go
 
 run-client:
-	go run client/main.go
+	go run cmd/client/main.go
 
