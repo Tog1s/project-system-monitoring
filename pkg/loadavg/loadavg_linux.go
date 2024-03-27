@@ -9,15 +9,6 @@ import (
 	"strings"
 )
 
-type LoadAverage struct {
-	LoadAvg1  float64
-	LoadAvg5  float64
-	LoadAvg15 float64
-	// ProcRuning     int
-	// ProcAll        int
-	// LastProcessId  int
-}
-
 func Get() (*LoadAverage, error) {
 	stats, err := loadAvgFromFile()
 	if err != nil {

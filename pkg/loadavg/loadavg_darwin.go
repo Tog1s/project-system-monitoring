@@ -9,12 +9,6 @@ import (
 	"golang.org/x/sys/unix"
 )
 
-type LoadAverage struct {
-	LoadAvg1  float64
-	LoadAvg5  float64
-	LoadAvg15 float64
-}
-
 func Get() (*LoadAverage, error) {
 	type loadavg struct {
 		load  [3]uint32
