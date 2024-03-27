@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"flag"
 	"io"
 	"log"
@@ -12,7 +13,9 @@ import (
 )
 
 var (
-	addr = flag.String("addr", "localhost:50051", "the address to connect to")
+	addr           = flag.String("addr", "localhost:50051", "the address to connect to")
+	scrapeInterval = flag.Int("scrape", 5, "how frequently to scrape metrics from server (seconds)")
+	averageWindow  = flag.Int("average", 15, "average window (seconds)")
 )
 
 func main() {
@@ -25,8 +28,11 @@ func main() {
 	defer conn.Close()
 
 	client := pb.NewMetricsClient(conn)
-
-	stream, err := client.Get(context.Background(), &pb.Request{Query: ""})
+	stream, err := client.Get(context.Background(), &pb.Request{
+		Query:          "",
+		ScrapeInterval: int32(*scrapeInterval),
+		AverageWindow:  int32(*averageWindow),
+	})
 	if err != nil {
 		log.Fatalln("client error", err)
 	}
@@ -35,7 +41,7 @@ func main() {
 	go func() {
 		for {
 			metrics, err := stream.Recv()
-			if err == io.EOF {
+			if errors.Is(err, io.EOF) {
 				break
 			}
 			if err != nil {

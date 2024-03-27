@@ -5,10 +5,12 @@ option go_package = "./;pb";
 service Metrics {
     rpc Get(Request) returns (stream Response) { 
     }
-} 
+}
 
 message Request {
-    string query = 1;
+    string Query = 1;
+    int32 ScrapeInterval = 2;
+    int32 AverageWindow = 3;
 }
 
 message Response {
