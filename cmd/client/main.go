@@ -33,6 +33,7 @@ func main() {
 		ScrapeInterval: int32(*scrapeInterval),
 		AverageWindow:  int32(*averageWindow),
 	})
+	//nolint:gocritic
 	if err != nil {
 		log.Fatalln("client error", err)
 	}

@@ -21,11 +21,10 @@ type Service struct {
 }
 
 var (
-	store            = storage.New()
-	loadAverage bool = true
-	addr             = flag.String("addr", "localhost:50051", "listen address and port")
-	configFile       = flag.String("config", "configs/config.yaml", "Path to config file")
-	startTime   time.Time
+	store      = storage.New()
+	addr       = flag.String("addr", "localhost:50051", "listen address and port")
+	configFile = flag.String("config", "configs/config.yaml", "Path to config file")
+	startTime  time.Time
 )
 
 func newResponse(m *metrics.SystemMetricsAverage) *pb.Response {
@@ -36,10 +35,8 @@ func newResponse(m *metrics.SystemMetricsAverage) *pb.Response {
 	}
 }
 
-func startStream(stream pb.Metrics_GetServer, done chan bool,
-	message *pb.Request, ticker time.Ticker) {
-
-	duration := time.Duration(time.Duration(message.AverageWindow) * time.Second)
+func startStream(stream pb.Metrics_GetServer, done chan bool, message *pb.Request, ticker time.Ticker) {
+	duration := time.Duration(message.AverageWindow) * time.Second
 
 	if time.Since(startTime) < duration {
 		time.Sleep(duration - time.Since(startTime))

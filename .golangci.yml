@@ -12,6 +12,7 @@ linters-settings:
           - $gostd
           - github.com/tog1s
           - github.com/stretchr/testify/require
+          - github.com/google/uuid
 
 linters:
   disable-all: true
