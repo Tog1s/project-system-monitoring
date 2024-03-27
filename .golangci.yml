@@ -5,6 +5,13 @@ linters-settings:
   funlen:
     lines: 150
     statements: 80
+  depguard:
+    rules:
+      main:
+        allow:
+          - $gostd
+          - github.com/tog1s
+          - github.com/stretchr/testify/require
 
 linters:
   disable-all: true
