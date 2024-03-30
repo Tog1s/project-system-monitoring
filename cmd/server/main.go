@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"log"
 	"net"
 	"time"
@@ -12,7 +11,7 @@ import (
 	"github.com/tog1s/project-system-monitoring/internal/metrics"
 	"github.com/tog1s/project-system-monitoring/internal/storage"
 	"github.com/tog1s/project-system-monitoring/pb"
-	"github.com/tog1s/project-system-monitoring/pkg/loadavg"
+	"github.com/tog1s/project-system-monitoring/pkg/pipeline"
 	"google.golang.org/grpc"
 )
 
@@ -33,6 +32,36 @@ func newResponse(m *metrics.SystemMetricsAverage) *pb.Response {
 		LoadAvg5:  float32(m.LoadAvg5),
 		LoadAvg15: float32(m.LoadAvg15),
 	}
+}
+
+func collectMetrics(cfg config.Config) {
+	in := make(pipeline.Bi)
+	done := make(chan bool)
+	ticker := time.NewTicker(1 * time.Second)
+	go func() {
+		for {
+			select {
+			case <-ticker.C:
+				m := metrics.SystemMetrics{
+					ID:          uuid.New(),
+					CollectedAt: time.Now(),
+				}
+				in <- m
+			case <-done:
+				return
+			}
+		}
+	}()
+
+	stages := metrics.Collect(cfg)
+	go func(storage *storage.Store) {
+		for metric := range pipeline.ExecutePipeline(in, nil, stages...) {
+			err := storage.Write(metric.(metrics.SystemMetrics))
+			if err != nil {
+				log.Printf("record writing error: %v", err)
+			}
+		}
+	}(store)
 }
 
 func startStream(stream pb.Metrics_GetServer, done chan bool, message *pb.Request, ticker time.Ticker) {
@@ -75,25 +104,6 @@ func (s *Service) Get(message *pb.Request, stream pb.Metrics_GetServer) error {
 	return nil
 }
 
-func collectMetrics(cfg config.Config) {
-	for {
-		record := new(metrics.SystemMetrics)
-		record.ID = uuid.New()
-		record.CollectedAt = time.Now()
-		if cfg.Metrics.LoadAverage {
-			loadAvg, err := loadavg.Get()
-			if err != nil {
-				fmt.Println(err)
-			}
-			record.Load = loadAvg
-		}
-		err := store.Write(*record)
-		if err != nil {
-			log.Printf("record writing error: %v", err)
-		}
-	}
-}
-
 func main() {
 	flag.Parse()
 
@@ -102,8 +112,6 @@ func main() {
 		log.Fatalf("error reading configuration file: %s", err)
 	}
 
-	go collectMetrics(*cfg)
-
 	lsn, err := net.Listen("tcp", *addr)
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
@@ -111,6 +119,8 @@ func main() {
 
 	server := grpc.NewServer()
 	pb.RegisterMetricsServer(server, &Service{})
+
+	go collectMetrics(*cfg)
 
 	log.Printf("starting server on %s", lsn.Addr().String())
 	startTime = time.Now()

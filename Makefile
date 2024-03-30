@@ -8,6 +8,8 @@ generate:
 		--go-grpc_out=pb/ \
 		proto/*.proto
 
+build: build.server build.client
+
 build.server:
 	go build -v -o ./bin/server ./cmd/server
 
@@ -21,7 +23,7 @@ run-client:
 	go run cmd/client/main.go
 
 test:
-	go test -race -count 100 ./pkg/...
+	go test -race -count 100 ./pkg/loadavg
 	go test -race -count 100 ./internal/...
 
 lint:
