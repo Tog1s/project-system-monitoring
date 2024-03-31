@@ -13,7 +13,7 @@ import (
 
 func TestStorage(t *testing.T) {
 	t.Run("test write, all, remove", func(t *testing.T) {
-		some_metrics := metrics.SystemMetrics{
+		someMetrics := metrics.SystemMetrics{
 			ID:          uuid.New(),
 			CollectedAt: time.Now(),
 			Load: &loadavg.LoadAverage{
@@ -23,15 +23,15 @@ func TestStorage(t *testing.T) {
 			},
 		}
 		store := New()
-		err := store.Write(some_metrics)
+		err := store.Write(someMetrics)
 		require.NoError(t, err)
 
 		m, err := store.All()
 		require.NoError(t, err)
 		require.Len(t, m, 1)
-		require.Equal(t, some_metrics, m[0])
+		require.Equal(t, someMetrics, m[0])
 
-		err = store.Remove(some_metrics.ID)
+		err = store.Remove(someMetrics.ID)
 		require.NoError(t, err)
 
 		m, err = store.All()
@@ -41,7 +41,7 @@ func TestStorage(t *testing.T) {
 
 	t.Run("test averaged", func(t *testing.T) {
 		store := New()
-		some_metrics := []metrics.SystemMetrics{
+		someMetrics := []metrics.SystemMetrics{
 			{
 				ID:          uuid.New(),
 				CollectedAt: time.Now().Add(-10 * time.Second),
@@ -71,7 +71,7 @@ func TestStorage(t *testing.T) {
 			},
 		}
 
-		for _, v := range some_metrics {
+		for _, v := range someMetrics {
 			err := store.Write(v)
 			if err != nil {
 				t.FailNow()
@@ -87,6 +87,5 @@ func TestStorage(t *testing.T) {
 		require.Equal(t, math.Round(avg.LoadAvg1*100)/100, 1.25)
 		require.Equal(t, math.Round(avg.LoadAvg5*100)/100, 1.25)
 		require.Equal(t, math.Round(avg.LoadAvg15*100)/100, 1.25)
-
 	})
 }
