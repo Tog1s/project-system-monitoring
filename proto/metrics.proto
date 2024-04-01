@@ -14,7 +14,18 @@ message Request {
 }
 
 message Response {
+    LoadMessage load = 2;
+    CPUMessage cpu = 3;
+    }
+
+message LoadMessage {
     float LoadAvg1 = 1;
     float LoadAvg5 = 2;
     float LoadAvg15 = 3;
+}
+
+message CPUMessage {
+    float User = 1;
+    float System = 2;
+    float Idle = 3;
 }

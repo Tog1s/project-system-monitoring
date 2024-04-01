@@ -13,6 +13,7 @@ type Config struct {
 
 type MetricsConfig struct {
 	LoadAverage bool
+	CPU         bool
 }
 
 func New() Config {

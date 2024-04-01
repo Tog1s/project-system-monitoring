@@ -6,6 +6,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/tog1s/project-system-monitoring/internal/config"
+	"github.com/tog1s/project-system-monitoring/pkg/cpustat"
 	"github.com/tog1s/project-system-monitoring/pkg/loadavg"
 	"github.com/tog1s/project-system-monitoring/pkg/pipeline"
 )
@@ -20,12 +21,16 @@ type SystemMetricsAverage struct {
 	LoadAvg1  float64
 	LoadAvg5  float64
 	LoadAvg15 float64
+	CPUUser   float64
+	CPUSystem float64
+	CPUIdle   float64
 }
 
 type SystemMetrics struct {
 	ID          uuid.UUID
 	CollectedAt time.Time
 	Load        *loadavg.LoadAverage
+	CPUStat     *cpustat.CPUStat
 }
 
 func Collect(cfg config.Config) []pipeline.Stage {
@@ -37,9 +42,23 @@ func Collect(cfg config.Config) []pipeline.Stage {
 			func(m SystemMetrics) SystemMetrics {
 				la, err := loadavg.Get()
 				if err != nil {
-					log.Printf("failed to read loadavg: %s", err)
+					log.Printf("failed to get loadavg: %s", err)
 				}
 				m.Load = la
+				return m
+			}),
+		)
+	}
+
+	if cfg.Metrics.CPU {
+		stages = append(stages, stageGenerator(
+			"CPU",
+			func(m SystemMetrics) SystemMetrics {
+				cpu, err := cpustat.Get()
+				if err != nil {
+					log.Printf("failed to get cpustats: %s", err)
+				}
+				m.CPUStat = cpu
 				return m
 			}),
 		)

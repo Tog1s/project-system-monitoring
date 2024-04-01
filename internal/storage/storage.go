@@ -62,12 +62,15 @@ func (s *Store) Averaged(duration time.Duration) (*metrics.SystemMetricsAverage,
 
 	now := time.Now()
 	total := 0.0
-	var loadAvg1, loadAvg5, loadAvg15 float64
+	var loadAvg1, loadAvg5, loadAvg15, cpuUser, cpuSystem, cpuIdle float64
 	for _, systemMetrics := range s.metrics {
 		if now.Sub(systemMetrics.CollectedAt) <= duration {
 			loadAvg1 += systemMetrics.Load.LoadAvg1
 			loadAvg5 += systemMetrics.Load.LoadAvg5
 			loadAvg15 += systemMetrics.Load.LoadAvg15
+			cpuUser += systemMetrics.CPUStat.User
+			cpuSystem += systemMetrics.CPUStat.System
+			cpuIdle += systemMetrics.CPUStat.Idle
 			total++
 		} else {
 			delete(s.metrics, systemMetrics.ID)
@@ -77,5 +80,8 @@ func (s *Store) Averaged(duration time.Duration) (*metrics.SystemMetricsAverage,
 		LoadAvg1:  loadAvg1 / total,
 		LoadAvg5:  loadAvg5 / total,
 		LoadAvg15: loadAvg15 / total,
+		CPUUser:   cpuUser / total,
+		CPUSystem: cpuSystem / total,
+		CPUIdle:   cpuIdle / total,
 	}, nil
 }

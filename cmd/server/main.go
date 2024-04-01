@@ -28,9 +28,16 @@ var (
 
 func newResponse(m *metrics.SystemMetricsAverage) *pb.Response {
 	return &pb.Response{
-		LoadAvg1:  float32(m.LoadAvg1),
-		LoadAvg5:  float32(m.LoadAvg5),
-		LoadAvg15: float32(m.LoadAvg15),
+		Load: &pb.LoadMessage{
+			LoadAvg1:  float32(m.LoadAvg1),
+			LoadAvg5:  float32(m.LoadAvg5),
+			LoadAvg15: float32(m.LoadAvg15),
+		},
+		Cpu: &pb.CPUMessage{
+			User:   float32(m.CPUUser),
+			System: float32(m.CPUSystem),
+			Idle:   float32(m.CPUIdle),
+		},
 	}
 }
 

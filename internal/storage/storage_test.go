@@ -8,6 +8,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
 	"github.com/tog1s/project-system-monitoring/internal/metrics"
+	"github.com/tog1s/project-system-monitoring/pkg/cpustat"
 	"github.com/tog1s/project-system-monitoring/pkg/loadavg"
 )
 
@@ -20,6 +21,11 @@ func TestStorage(t *testing.T) {
 				LoadAvg1:  1.0,
 				LoadAvg5:  1.0,
 				LoadAvg15: 1.0,
+			},
+			CPUStat: &cpustat.CPUStat{
+				User:   0.5,
+				System: 0.5,
+				Idle:   99.0,
 			},
 		}
 		store := New()
@@ -50,6 +56,11 @@ func TestStorage(t *testing.T) {
 					LoadAvg5:  2.0,
 					LoadAvg15: 2.0,
 				},
+				CPUStat: &cpustat.CPUStat{
+					User:   0.5,
+					System: 0.5,
+					Idle:   99.0,
+				},
 			},
 			{
 				ID:          uuid.New(),
@@ -59,6 +70,11 @@ func TestStorage(t *testing.T) {
 					LoadAvg5:  1.0,
 					LoadAvg15: 1.0,
 				},
+				CPUStat: &cpustat.CPUStat{
+					User:   0.5,
+					System: 0.5,
+					Idle:   99.0,
+				},
 			},
 			{
 				ID:          uuid.New(),
@@ -67,6 +83,11 @@ func TestStorage(t *testing.T) {
 					LoadAvg1:  1.5,
 					LoadAvg5:  1.5,
 					LoadAvg15: 1.5,
+				},
+				CPUStat: &cpustat.CPUStat{
+					User:   0.5,
+					System: 0.5,
+					Idle:   99.0,
 				},
 			},
 		}
