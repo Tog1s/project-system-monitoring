@@ -20,7 +20,11 @@ func (c CPUStat) String() string {
 }
 
 func Get() (*CPUStat, error) {
-	cmd := exec.Command("top", "-b", "-n1")
+	// cmd := exec.Command("top", "-b", "-n1")
+
+	cmd := exec.Command("mpstat")
+	cmd.Env = append(cmd.Environ(), "LC_NUMERIC=en_GB.UTF-8")
+
 	r, err := cmd.Output()
 	if err != nil {
 		return nil, err
@@ -32,21 +36,17 @@ func Get() (*CPUStat, error) {
 
 	cpuStat := strings.Fields(fields[2])
 
-	cpuUser, err := strconv.ParseFloat(strings.ReplaceAll(cpuStat[1], ",", "."), 64)
+	cpuUser, err := strconv.ParseFloat(cpuStat[2], 64)
 	if err != nil {
 		return nil, err
 	}
 
-	cpuSystem, err := strconv.ParseFloat(strings.ReplaceAll(cpuStat[3], ",", "."), 64)
+	cpuSystem, err := strconv.ParseFloat(cpuStat[4], 64)
 	if err != nil {
 		return nil, err
 	}
 
-	if cpuStat[7] == "id," {
-		idle = cpuStat[6]
-	}
-
-	cpuIdle, err := strconv.ParseFloat(strings.ReplaceAll(idle, ",", "."), 64)
+	cpuIdle, err := strconv.ParseFloat(cpuStat[11], 64)
 	if err != nil {
 		return nil, err
 	}
