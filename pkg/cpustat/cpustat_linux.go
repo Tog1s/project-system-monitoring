@@ -13,8 +13,6 @@ type CPUStat struct {
 	Idle   float64
 }
 
-var idle string
-
 func (c CPUStat) String() string {
 	return fmt.Sprintf("User: %f System: %f Idle: %f", c.User, c.System, c.Idle)
 }
