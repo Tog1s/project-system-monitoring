@@ -24,6 +24,7 @@ run-client:
 
 test:
 	go test -race -count 100 ./pkg/loadavg
+	go test -race -count 100 ./pkg/cpustat
 	go test -race -count 100 ./internal/...
 
 lint:

@@ -15,5 +15,4 @@ func TestGetFunc(t *testing.T) {
 		require.NotNil(t, la.LoadAvg5)
 		require.NotNil(t, la.LoadAvg15)
 	})
-
 }
