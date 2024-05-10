@@ -1,0 +1,31 @@
+syntax = "proto3";
+package metrics;
+option go_package = "./;pb";
+
+service Metrics {
+    rpc Get(Request) returns (stream Response) { 
+    }
+}
+
+message Request {
+    string Query = 1;
+    int32 ScrapeInterval = 2;
+    int32 AverageWindow = 3;
+}
+
+message Response {
+    LoadMessage load = 2;
+    CPUMessage cpu = 3;
+    }
+
+message LoadMessage {
+    float LoadAvg1 = 1;
+    float LoadAvg5 = 2;
+    float LoadAvg15 = 3;
+}
+
+message CPUMessage {
+    float User = 1;
+    float System = 2;
+    float Idle = 3;
+}
